@@ -71,5 +71,5 @@ resource "aws_s3_bucket" "gis_analytics" {
 
 # Output the bucket name
 output "bucket_name" {
-  value = aws_s3_bucket.gis_analytics.bucket
+  value = aws_s3_bucket.gis_analytics_1.bucket
 }
