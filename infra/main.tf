@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-west-2" # Replace with your desired AWS region
+  region = "us-east-1" # Replace with your desired AWS region
 }
 
 # IAM Policy that grants permissions for S3 operations
@@ -23,10 +23,7 @@ resource "aws_iam_policy" "s3_policy" {
         Action = [
           "s3:PutObject",
           "s3:GetObject",
-          "s3:DeleteObject",
-          "s3:PutObjectAcl",
-          "s3:GetObjectAcl",
-          "s3:DeleteObjectAcl"
+          "s3:DeleteObject"
         ],
         Effect   = "Allow",
         Resource = "arn:aws:s3:::gis-analytics/*"
@@ -34,9 +31,7 @@ resource "aws_iam_policy" "s3_policy" {
       {
         Action = [
           "s3:CreateBucket",
-          "s3:DeleteBucket",
-          "s3:PutBucketAcl",
-          "s3:GetBucketAcl"
+          "s3:DeleteBucket"
         ],
         Effect   = "Allow",
         Resource = "arn:aws:s3:::gis-analytics"
@@ -72,12 +67,6 @@ resource "aws_iam_role_policy_attachment" "s3_policy_attach" {
 # S3 Bucket creation
 resource "aws_s3_bucket" "gis_analytics" {
   bucket = "gis-analytics" # Ensure this name is unique and lowercase
-}
-
-# Separate ACL management for the S3 bucket
-resource "aws_s3_bucket_acl" "gis_analytics_acl" {
-  bucket = aws_s3_bucket.gis_analytics.id
-  acl    = "private"
 }
 
 # Output the bucket name
