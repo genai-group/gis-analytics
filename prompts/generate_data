@@ -1,0 +1,64 @@
+# Prompts to Generate Data
+
+## Flight Manifest (72 hours, 24 hours, 0 hours)
+
+### Customer Instructions: 
+You are a pseudo data generator with capabilities of creating hyper realistic data sets for testing purposes. 
+
+
+### Prompt: => Prompt for Generating Airline Flight Manifest JSON Files with Specific Requirements:
+
+Create a series of JSON files for three airline flight manifests (72 hours before the flight, 24 hours before the flight and 0 hours before the flight), each containing detailed passenger and flight information. The requirements for these files are as follows:
+
+First File - Baseline Manifest (72 Hours to Departure):
+
+Passenger Information:
+Generate data for 250 fake passengers, including full names, gender, date of birth, country of citizenship, government ID, and passport information.
+Ensure that names match gender and the information is typical of an international flight.
+The majority of passengers should be from the countries of the flight's departure and arrival.
+Flight Information:
+"city_of_departure": [Specify City and Country]
+"departure_airport_name": [Specify Departure Airport and Airport acronym]
+"departure_gate": [Specify Departure Gate]
+"departure_time": [Specify Date and Time]
+"city_of_arrival": [Specify City and Country]
+"arrival_airport_name": [Specify Arrival Airport and Airport acronym]
+"arrival_gate": [Specify Departure Gate]
+"arrival_time": [Specify Date and Time]
+"airline_name": [Specify Airline]
+"flight_number": [Specify Flight Number]
+"time_to_departure": [Specify Hours until departure 0, 24 or 72 hours in military style]
+
+Passenger Information:
+"full_name": [Specify full name],
+"gender": [Specify gender],
+"date_of_birth": [Specify Realistic Birth Date]
+"country_of_citizenship": [Specify Country of Citizenship],
+"government_id_type": [Specify Appropriate Government ID Type],
+"passport_information": [Specify Appropriate Government ID Number that Matches the Type]
+
+Output as a JSON file, with passenger data in an array titled passenger_info.
+
+
+Second File - Modified Manifest (24 Hours to Departure):
+Include all data from the first file.
+Replace the last three passengers with new passenger data.
+Update time_to_departure to 24 hours.
+
+Third File - Final Manifest (0 Hours to Departure):
+Retain all passenger information from the second file.
+Add two additional passengers with new data.
+Update time_to_departure to 0 hours.
+
+Each file should be formatted for easy reading and use in downstream tasks. Ensure consistency in flight information across all files, except for the specified modifications in passenger data and time to departure. Create a .zip file which includes the three json files you've created.
+
+
+## Border Management System
+
+### Prompt:
+what are some specific data points which you would find in a border management system used to identify and profile individuals entering the united states. Go into excruciating detail and provide a database schema for the database.
+
+Now using that database schema create a series of csv files, one for each table, and load each data with fake data. Be sure to be very careful to include primary and foreign keys that match the individual, their IDs and their data across each table. Be realistic in the data points about names, locations, and personal information and use real names for places, countries, identification types based on country, etc. Create a database of 1,000 people and their associated information and load them all in a separate csv file based on the schema you provided. Load all of the .csv files into a .zip file which I can download. Also output a sql file which I can use to create all of the tables, together with their primary keys and foreign keys. Include data types, etc. Please build the data for all tables, don't stop with the person table. Take time to make sure the data across all tables works well together and makes sense. I know you can do it. Please implement the suggestions above and do the task. Please perform the same action across all tables in the schema. Expand the sql table creation statements for all tables in the schema in a .sql file.
+
+Please create all tables with the constraints above, paying specific detail to the primary and foreign key relationships so an individuals data will be tied together across all tables. 
+
