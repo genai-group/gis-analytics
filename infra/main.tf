@@ -26,7 +26,7 @@ resource "aws_iam_policy" "s3_policy" {
           "s3:DeleteObject"
         ],
         Effect   = "Allow",
-        Resource = "arn:aws:s3:::gis-analytics-new/*"
+        Resource = "arn:aws:s3:::gis-analytics-1/*"
       },
       {
         Action = [
@@ -34,7 +34,7 @@ resource "aws_iam_policy" "s3_policy" {
           "s3:DeleteBucket"
         ],
         Effect   = "Allow",
-        Resource = "arn:aws:s3:::gis-analytics-new-new"
+        Resource = "arn:aws:s3:::gis-analytics-1"
       }
     ]
   })
@@ -66,7 +66,7 @@ resource "aws_iam_role_policy_attachment" "s3_policy_attach" {
 
 # S3 Bucket creation
 resource "aws_s3_bucket" "gis_analytics" {
-  bucket = "gis-analytics-new" # Ensure this name is unique and lowercase
+  bucket = "gis-analytics-1" # Ensure this name is unique and lowercase
 }
 
 # Output the bucket name
