@@ -65,7 +65,7 @@ resource "aws_iam_role_policy_attachment" "s3_policy_attach" {
 }
 
 # S3 Bucket creation
-resource "aws_s3_bucket" "gis_analytics" {
+resource "aws_s3_bucket" "gis_analytics_1" {
   bucket = "gis-analytics-1" # Ensure this name is unique and lowercase
 }
 
