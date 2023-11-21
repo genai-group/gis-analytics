@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os
 
 class Config(object):
@@ -5,3 +7,4 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///your-database.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # Add other configuration settings as needed
+
