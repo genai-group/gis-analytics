@@ -17,6 +17,21 @@ def s3_connect():
         s3_client = None
     return s3_client
 
+#####################
+####    MinIO    ####
+#####################
+
+# Install MinIO
+
+# curl -O https://dl.min.io/server/minio/release/darwin-arm64/minio
+# chmod +x ./minio
+# sudo mv ./minio /usr/local/bin/
+
+# start the minio server
+# minio server ~/data/minio
+
+
+
 ##########################
 ####    PostgreSQL    ####
 ##########################
@@ -118,4 +133,71 @@ def create_table():
     except psycopg2.Error as e:
         print(f"Error creating table: {e}")
 
+
+#######################
+####    MongoDB    ####
+#######################
+
+"""
+docker pull --platform linux/arm64 mongo
+docker run --name mongodb -d -p 27017:27017 --platform linux/arm64 mongo
+
+RUN WITH USERNAME AND PASSWORD
+docker run --name mongodb -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=myuser -e MONGO_INITDB_ROOT_PASSWORD=mypassword --platform linux/arm64 mongo
+"""
+
+
 # %%
+
+def connect_to_mongodb(host: str = 'localhost', 
+                       port: int = 27017, 
+                       username: Optional[str] = None, 
+                       password: Optional[str] = None, 
+                       db_name: str = 'mydatabase') -> Database:
+    """
+    Establishes a connection to a MongoDB database.
+
+    Parameters:
+    host (str): The hostname or IP address of the MongoDB server. Defaults to 'localhost'.
+    port (int): The port number on which MongoDB is running. Defaults to 27017.
+    username (Optional[str]): The username for MongoDB authentication. Defaults to None.
+    password (Optional[str]): The password for MongoDB authentication. Defaults to None.
+    db_name (str): The name of the database to connect to. Defaults to 'mydatabase'.
+
+    Returns:
+    Database: A MongoDB database object.
+
+    Raises:
+    AssertionError: If the provided host, port, or db_name are not valid.
+    ConnectionFailure: If the connection to the MongoDB server fails.
+    PyMongoError: For other PyMongo related errors.
+
+    Example:
+    >>> db = connect_to_mongodb('localhost', 27017, 'user', 'pass', 'mydb')
+    >>> print(db.name)
+    mydb
+    """
+
+    # Input validation
+    assert isinstance(host, str) and host, "Host must be a non-empty string."
+    assert isinstance(port, int) and port > 0, "Port must be a positive integer."
+    assert isinstance(db_name, str) and db_name, "Database name must be a non-empty string."
+
+    try:
+        # Create a MongoDB client instance
+        client = MongoClient(host, port, username=username, password=password)
+
+        # Access the specified database
+        db = client[db_name]
+
+        # Attempt a simple operation to verify the connection
+        db.command('ping')
+
+        return db
+    except ConnectionFailure as e:
+        raise ConnectionFailure(f"Failed to connect to MongoDB: {e}")
+    except PyMongoError as e:
+        raise PyMongoError(f"An error occurred with PyMongo: {e}")
+
+# Example usage
+# db = connect_to_mongodb('localhost', 27017, 'myuser', 'mypassword', 'mydatabase')

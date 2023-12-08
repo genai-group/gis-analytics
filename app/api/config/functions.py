@@ -1,11 +1,14 @@
 #!/usr/bin/python
 
+#%%
 from modules import *
 from clients import *
 
 ###############################
 ####    Basic Functions    ####
 ###############################
+
+#%%
 
 def map_func(func, *iterables):
     """
@@ -244,6 +247,170 @@ def s3_generate_presigned_url(bucket_name: str, object_name: str, expiration: in
     except ClientError as e:
         print(f"Error generating presigned URL: {e}")
 
+
+###############################
+####    Minio Functions    ####
+###############################
+
+import boto3
+from botocore.exceptions import ClientError
+from typing import Optional
+
+def minio_create_bucket(bucket_name: str, endpoint_url: str, access_key: str, secret_key: str) -> None:
+    """
+    Create a new bucket in MinIO.
+
+    Args:
+        bucket_name (str): The name of the bucket to create.
+        endpoint_url (str): The endpoint URL of the MinIO server.
+        access_key (str): MinIO access key.
+        secret_key (str): MinIO secret key.
+
+    Returns:
+        None
+    """
+    assert bucket_name, "Bucket name must be provided"
+    assert endpoint_url, "Endpoint URL must be provided"
+    assert access_key, "Access key must be provided"
+    assert secret_key, "Secret key must be provided"
+
+    try:
+        minio_client = boto3.client('s3', endpoint_url=endpoint_url,
+                                    aws_access_key_id=access_key,
+                                    aws_secret_access_key=secret_key)
+        minio_client.create_bucket(Bucket=bucket_name)
+        print(f"Bucket '{bucket_name}' created")
+    except ClientError as e:
+        print(f"Error creating bucket: {e}")
+
+def minio_list_items(bucket_name: str, endpoint_url: str, access_key: str, secret_key: str) -> None:
+    """
+    List all items in a specified MinIO bucket.
+
+    Args:
+        bucket_name (str): The name of the bucket to list items from.
+        endpoint_url (str): The endpoint URL of the MinIO server.
+        access_key (str): MinIO access key.
+        secret_key (str): MinIO secret key.
+
+    Returns:
+        None
+    """
+    assert bucket_name, "Bucket name must be provided"
+    assert endpoint_url, "Endpoint URL must be provided"
+    assert access_key, "Access key must be provided"
+    assert secret_key, "Secret key must be provided"
+
+    try:
+        minio_client = boto3.client('s3', endpoint_url=endpoint_url,
+                                    aws_access_key_id=access_key,
+                                    aws_secret_access_key=secret_key)
+        contents = minio_client.list_objects_v2(Bucket=bucket_name).get('Contents', [])
+        for item in contents:
+            print(item['Key'])
+    except ClientError as e:
+        print(f"Error listing items in bucket: {e}")
+
+def minio_empty_and_delete_bucket(bucket_name: str, endpoint_url: str, access_key: str, secret_key: str) -> None:
+    """
+    Empty and delete a specified MinIO bucket.
+
+    Args:
+        bucket_name (str): The name of the bucket to empty and delete.
+        endpoint_url (str): The endpoint URL of the MinIO server.
+        access_key (str): MinIO access key.
+        secret_key (str): MinIO secret key.
+
+    Returns:
+        None
+    """
+    assert bucket_name, "Bucket name must be provided"
+    assert endpoint_url, "Endpoint URL must be provided"
+    assert access_key, "Access key must be provided"
+    assert secret_key, "Secret key must be provided"
+
+    try:
+        s3_resource = boto3.resource('s3', endpoint_url=endpoint_url,
+                                     aws_access_key_id=access_key,
+                                     aws_secret_access_key=secret_key)
+        bucket = s3_resource.Bucket(bucket_name)
+        bucket.objects.all().delete()
+        bucket.delete()
+        print(f"Bucket '{bucket_name}' emptied and deleted")
+    except ClientError as e:
+        print(f"Error in emptying and deleting bucket: {e}")
+
+def minio_upload_file(bucket_name: str, file_path: str, endpoint_url: str, access_key: str, secret_key: str, object_name: Optional[str] = None) -> None:
+    """
+    Upload a file to a MinIO bucket.
+
+    Args:
+        bucket_name (str): The name of the bucket to upload to.
+        file_path (str): The file path to upload.
+        endpoint_url (str): The endpoint URL of the MinIO server.
+        access_key (str): MinIO access key.
+        secret_key (str): MinIO secret key.
+        object_name (str, optional): The object name in the bucket. Defaults to file_path if None.
+
+    Returns:
+        None
+    """
+    assert bucket_name, "Bucket name must be provided"
+    assert file_path, "File path must be provided"
+    assert endpoint_url, "Endpoint URL must be provided"
+    assert access_key, "Access key must be provided"
+    assert secret_key, "Secret key must be provided"
+
+    object_name = object_name if object_name else file_path
+
+    try:
+        minio_client = boto3.client('s3', endpoint_url=endpoint_url,
+                                    aws_access_key_id=access_key,
+                                    aws_secret_access_key=secret_key)
+        with open(file_path, 'rb') as file:
+            minio_client.upload_fileobj(file, bucket_name, object_name)
+        print(f"File '{file_path}' uploaded to '{bucket_name}/{object_name}'")
+    except ClientError as e:
+        print(f"Error uploading file: {e}")
+
+
+def minio_download_file(bucket_name: str, object_name: str, endpoint_url: str, access_key: str, secret_key: str, file_path: Optional[str] = None) -> None:
+    """
+    Download a file from a MinIO bucket.
+
+    Args:
+        bucket_name (str): The name of the MinIO bucket.
+        object_name (str): The object name in the bucket to download.
+        endpoint_url (str): The endpoint URL of the MinIO server.
+        access_key (str): MinIO access key.
+        secret_key (str): MinIO secret key.
+        file_path (str, optional): The local file path to save the downloaded file. Defaults to object_name if None.
+
+    Returns:
+        None
+    """
+    assert bucket_name, "Bucket name must be provided"
+    assert object_name, "Object name must be provided"
+    assert endpoint_url, "Endpoint URL must be provided"
+    assert access_key, "Access key must be provided"
+    assert secret_key, "Secret key must be provided"
+
+    file_path = file_path if file_path else object_name
+
+    try:
+        minio_client = boto3.client('s3', endpoint_url=endpoint_url,
+                                    aws_access_key_id=access_key,
+                                    aws_secret_access_key=secret_key)
+        with open(file_path, 'wb') as file:
+            minio_client.download_fileobj(bucket_name, object_name, file)
+        print(f"File '{object_name}' downloaded from '{bucket_name}' to '{file_path}'")
+    except ClientError as e:
+        print(f"Error downloading file: {e}")
+
+
+
+
+
 ##################################
 ####    Postgres Functions    ####
 ##################################
@@ -330,8 +497,6 @@ conn = connect_to_postgres()
 json_data = '{"name": "John", "age": 30, "address": {"street": "123 Main St", "city": "Anytown"}, "hobbies": ["reading", "hiking"]}'
 create_table_from_json(conn, json.loads(json_data))
 
-
-
 def normalize_name(name: str) -> Optional[str]:
     """
     Normalizes a name string by performing various transformations.
@@ -384,4 +549,211 @@ except ValueError as ve:
     print(f"ValueError: {ve}")
 
 
+########################################
+####    Creating the Feature Map    ####
+########################################
+
+def read_sample(df: pd.DataFrame, sample_size: int = 100) -> pd.DataFrame:
+    """
+    Reads a random sample of rows from a pandas DataFrame.
+
+    Parameters:
+    df (pd.DataFrame): The DataFrame to sample from.
+    sample_size (int): The number of rows to sample. Default is 100.
+
+    Returns:
+    pd.DataFrame: A DataFrame containing the sampled rows.
+
+    Raises:
+    ValueError: If the provided DataFrame is empty or the sample size is non-positive.
+    """
+
+    assert isinstance(df, pd.DataFrame), "Input must be a pandas DataFrame"
+    assert isinstance(sample_size, int) and sample_size > 0, "Sample size must be a positive integer"
+
+    try:
+        return df.sample(n=min(sample_size, len(df)), random_state=1)
+    except ValueError as e:
+        raise ValueError("Error in sampling data: " + str(e))
+
+def identify_column_type(column: pd.Series) -> str:
+    """
+    Identify the column type based on a sample of data using pandas.api.types,
+    with specific handling for text and categorical data.
+
+    Parameters:
+    column (pd.Series): A pandas Series representing a column from a DataFrame.
+
+    Returns:
+    str: The identified data type of the column.
+
+    Raises:
+    TypeError: If the input is not a pandas Series.
+    Exception: For errors in identifying column types.
+    """
+
+    assert isinstance(column, pd.Series), "Input must be a pandas Series"
+
+    try:
+        if types.is_numeric_dtype(column):
+            if types.is_float_dtype(column):
+                return 'float'
+            elif types.is_integer_dtype(column):
+                return 'integer'
+            else:
+                return 'numeric'
+        elif types.is_datetime64_any_dtype(column):
+            return 'datetime'
+        elif types.is_timedelta64_dtype(column):
+            return 'time delta'
+        elif types.is_object_dtype(column):
+            sample_str = column.dropna().astype(str)
+            if sample_str.str.contains(r"^\s*\+?\d[\d -]{8,12}\d\s*$").any():
+                return 'phone'
+            elif sample_str.str.contains(r"^\s*[^@]+@[^@]+\.[^@]+\s*$").any():
+                return 'email'
+            elif sample_str.str.contains(r"^\s*\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b\s*$").any():
+                return 'ip address'
+            else:
+                unique_vals = sample_str.nunique()
+                if unique_vals == len(column):
+                    return 'text'
+                elif unique_vals < 10:
+                    return 'text_categorical_low_cardinality'
+                else:
+                    return 'text_categorical_high_cardinality'
+        else:
+            return 'unknown'
+    except Exception as e:
+        raise TypeError("Error in identifying column type: " + str(e))
+        
+def create_json_object(df: pd.DataFrame, column_types: dict) -> str:
+    """
+    Creates a JSON object with column names, types, and categories.
+
+    Parameters:
+    df (pd.DataFrame): The DataFrame whose columns are being analyzed.
+    column_types (dict): A dictionary with column names as keys and their data types as values.
+
+    Returns:
+    str: A JSON string representation of the column information.
+
+    Raises:
+    TypeError: If the inputs are not of the correct type.
+    """
+
+    assert isinstance(df, pd.DataFrame), "First argument must be a pandas DataFrame"
+    assert isinstance(column_types, dict), "Second argument must be a dictionary"
+
+    try:
+        json_object = {"columns": []}
+        for col, col_type in column_types.items():
+            json_object["columns"].append({
+                "column_name": col,
+                "column_type": col_type
+            })
+        return json.dumps(json_object, indent=4)
+    except Exception as e:
+        raise TypeError("Error in creating JSON object: " + str(e))
+
+def categorize_columns(df_sample: pd.DataFrame) -> dict:
+    """
+    Categorizes columns of the DataFrame based on their data types.
+
+    Parameters:
+    df_sample (pd.DataFrame): A pandas DataFrame sample whose columns are to be categorized.
+
+    Returns:
+    dict: A dictionary with column names as keys and determined data types as values.
+
+    Raises:
+    TypeError: If the input is not a pandas DataFrame.
+    Exception: For errors in categorizing column types.
+    """
+    
+    assert isinstance(df_sample, pd.DataFrame), "Input must be a pandas DataFrame"
+
+    column_types = {}
+    try:
+        for col in df_sample.columns:
+            column_type = identify_column_type(df_sample[col])
+            column_types[col] = column_type
+        return column_types
+    except Exception as e:
+        raise Exception(f"Error in categorizing columns: {str(e)}")
+
+
+"""
+
+try:
+    df_sample = read_sample(df)
+    column_types = categorize_columns(df_sample)
+    json_output = create_json_object(df, column_types)
+    print(json_output)
+except Exception as e:
+    print("An error occurred:", e)
+
+"""                        
+
+
+
+########################################
+####    Auto Feature Engineering    ####
+########################################
+
+
+def prepare_objects(object: Union[Dict, List]) -> Union[Dict, List]:
+    """
+    Recursively prepares a JSON object for feature engineering.
+
+    Args:
+    object (Union[Dict, List]): A JSON object.
+
+    Returns:
+    Union[Dict, List]: A JSON object prepared for feature engineering.
+    """
+    if isinstance(object, dict):
+        object = list(object)
+    elif isinstance(object, pd.DataFrame):
+        object = object.to_dict('records')
+    elif isinstance(object, list):
+        print(f"Object is already a list.")
+    else:
+        raise ValueError(f"Object type '{type(object)}' is not supported.")
+    
+    # Process each item in the JSON object
+    for item in object:
+        if isinstance(item, dict):
+            # Recursive call for nested objects
+            prepare_objects(item)
+        elif isinstance(item, list):
+            # Handle lists (arrays)
+            for item in value:
+                if isinstance(item, dict):
+                    prepare_objects(item)
+        else:
+            # Simple data types
+            object[key] = value    
+    if isinstance(object, dict):
+        # Process each key in the JSON object
+        for key, value in object.items():
+            if isinstance(value, dict):
+                # Recursive call for nested objects
+                object[key] = prepare_objects(value)
+            elif isinstance(value, list):
+                # Handle lists (arrays)
+                for item in value:
+                    if isinstance(item, dict):
+                        prepare_objects(item)
+            else:
+                # Simple data types
+                object[key] = value
+
+    elif isinstance(object, list):
+        # Handle JSON arrays
+        for item in object:
+            if isinstance(item, dict):
+                prepare_objects(item)
+
+    return object
 
