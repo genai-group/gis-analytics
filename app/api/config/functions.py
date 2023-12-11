@@ -757,3 +757,62 @@ def prepare_objects(object: Union[Dict, List]) -> Union[Dict, List]:
 
     return object
 
+
+########################
+#### XML to JSON    ####
+########################
+
+def parse_element_stream(element_iter: Iterator[etree.Element]) -> Dict[str, Any]:
+    """
+    Parses an XML element stream, preserving its attributes, text, and children.
+
+    Parameters:
+    element_iter (Iterator[etree.Element]): An iterator over XML elements.
+
+    Returns:
+    Dict[str, Any]: A dictionary representation of the XML element.
+    """
+    def add_child(parent_dict: Dict[str, Any], child: etree.Element):
+        child_dict = {"@attributes": child.attrib, "#text": child.text or ""}
+        if child.tag in parent_dict:
+            if not isinstance(parent_dict[child.tag], list):
+                parent_dict[child.tag] = [parent_dict[child.tag]]
+            parent_dict[child.tag].append(child_dict)
+        else:
+            parent_dict[child.tag] = child_dict
+
+    root_dict = {}
+    for event, elem in element_iter:
+        if event == 'start':
+            current_dict = {"@attributes": elem.attrib, "#text": elem.text or ""}
+            if not root_dict:
+                root_dict = current_dict
+            else:
+                add_child(root_dict, elem)
+        elif event == 'end':
+            elem.clear()
+    return root_dict
+
+@ray.remote
+def xml_to_json_stream(xml_data: Union[str, bytes]) -> str:
+    try:
+        context = etree.iterparse(etree.BytesIO(xml_data) if isinstance(xml_data, bytes) else xml_data, events=('start', 'end'))
+        xml_dict = parse_element_stream(context)
+        return json.dumps(xml_dict, ensure_ascii=False, indent=2)
+    except etree.XMLSyntaxError as e:
+        raise ValueError(f"Invalid XML data: {e}")
+
+# Example usage
+"""
+
+xml_str = "<root><child id='1'>Hello</child><child id='2'>World</child></root>"
+try:
+    json_str = xml_to_json_stream(xml_str)
+    print(json_str)
+except ValueError as e:
+    print(e)
+
+"""
+
+
+

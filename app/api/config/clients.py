@@ -17,6 +17,13 @@ def s3_connect():
         s3_client = None
     return s3_client
 
+######################################
+####    Ray - multi-processing    ####
+######################################
+
+ray.init()
+
+
 #####################
 ####    MinIO    ####
 #####################
@@ -30,7 +37,34 @@ def s3_connect():
 # start the minio server
 # minio server ~/data/minio
 
+def minio_connect(endpoint_url: str, access_key: str, secret_key: str):
+    """
+    Connect to a MinIO client.
 
+    Args:
+        endpoint_url (str): The endpoint URL of the MinIO server.
+        access_key (str): The access key for MinIO.
+        secret_key (str): The secret key for MinIO.
+
+    Returns:
+        boto3.client: A boto3 client object if the connection is successful, None otherwise.
+    """
+    try:
+        # Asserting that necessary parameters are provided
+        assert endpoint_url, "Endpoint URL must be provided"
+        assert access_key, "Access key must be provided"
+        assert secret_key, "Secret key must be provided"
+
+        # Creating a boto3 client for MinIO
+        minio_client = boto3.client('s3', endpoint_url=endpoint_url,
+                                    aws_access_key_id=access_key,
+                                    aws_secret_access_key=secret_key,
+                                    use_ssl=False)  # Set to True if your MinIO server uses SSL
+        print("MinIO Client Connected")
+        return minio_client
+    except Exception as e:
+        print(f"MinIO Client Connection Error: {e}")
+        return None
 
 ##########################
 ####    PostgreSQL    ####
