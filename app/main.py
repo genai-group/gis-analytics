@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
 #%%
-from api.config.init import *
+from config.init import *
 
 # %%
