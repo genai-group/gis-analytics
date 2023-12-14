@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 #%%
-from modules import *
-from clients import *
+from config.modules import *
+from config.clients import *
 
 ###############################
 ####    Basic Functions    ####

@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
 #%%
+from app.api.config.init import *
+
+#%%
 import os, json, re, sys
 import openpyxl
 import pandas as pd, numpy as np

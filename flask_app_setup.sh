@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Create base directory and subdirectories
-mkdir -p app/api app/services app/models app/utils tests
+mkdir -p app/api app/config app/services app/models app/utils tests
 
 # Create Python files in their respective directories
 touch app/__init__.py
