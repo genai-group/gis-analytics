@@ -2,7 +2,7 @@
 
 from flask import Flask
 
-from app.config.init import *
+from config.init import *
 
 app = Flask(__name__)
 
